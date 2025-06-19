@@ -221,7 +221,7 @@ function Sidebar() {
         <ul className="space-y-2">
           <li>
             <Link
-              to="/"
+              to="/home"
               className="flex items-center gap-3 py-2 px-3 rounded hover:bg-slate-800 focus:bg-slate-900 focus:text-green-500"
             >
               <TiHomeOutline className=" focus:text-green-700" /> Home
