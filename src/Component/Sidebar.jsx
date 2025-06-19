@@ -367,7 +367,7 @@ function Sidebar() {
       </nav>
 
      
-      <div className="p-2 text-white text-xl font-bold flex justify-center items-center hover:bg-slate-900 ">
+      <div className="p-1 pb-8 text-white text-xl font-bold flex justify-center items-center hover:bg-slate-900 ">
         &lt; 
       </div>
     </div>

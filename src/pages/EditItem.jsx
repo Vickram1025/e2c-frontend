@@ -52,7 +52,7 @@ const EditItem = () => {
       await axios.post('http://localhost:8000/product/createproduct', data);
       alert("Product created successfully");
 
-      // Reset form
+
       setForm({
         name: '',
         sku: '',
@@ -82,7 +82,7 @@ const EditItem = () => {
 
   return (
     <div className="w-[80%] h-[560px] bg-white ml-[260px]">
-      {/* Header */}
+      
       <div className="h-[44px] w-full flex items-center justify-between px-4 bg-slate-100 text-gray-700 border-b">
         <div className="flex items-center gap-4">
           <LuTimer className="text-xl text-gray-500" />
@@ -107,17 +107,16 @@ const EditItem = () => {
         </div>
       </div>
 
-      {/* Title */}
+     
       <div className='flex justify-between items-center px-3'>
         <h2 className="text-2xl font-bold text-start p-2">Edit Item</h2>
         <img src={xlogo} alt="" className='h-5 w-5' />
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="w-full h-[360px] bg-slate-100 mb-4 flex flex-col relative">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-4">
           <div className="space-y-2">
-            {/* Name */}
+            
             <div>
               <label className='flex gap-5'>
                 Name
@@ -131,7 +130,7 @@ const EditItem = () => {
               </label>
             </div>
 
-            {/* SKU */}
+           
             <div>
               <label className='flex gap-5'>
                 SKU
@@ -145,7 +144,7 @@ const EditItem = () => {
               </label>
             </div>
 
-            {/* Unit */}
+            
             <div>
               <label className='flex gap-5'>
                 Unit
@@ -164,7 +163,7 @@ const EditItem = () => {
               </label>
             </div>
 
-            {/* HSN Code */}
+           
             <div>
               <label className="flex gap-5 relative">
                 HSN Code
@@ -179,7 +178,7 @@ const EditItem = () => {
               </label>
             </div>
 
-            {/* Tax Preference */}
+           
             <div>
               <label className="flex gap-5">
                 Tax Preference
@@ -199,7 +198,7 @@ const EditItem = () => {
               </label>
             </div>
 
-            {/* Exemption Reason */}
+           
             <div>
               <label className="flex flex-row gap-5">
                 Exemption Reason
@@ -217,7 +216,7 @@ const EditItem = () => {
           </div>
         </div>
 
-        {/* Image Upload Section */}
+       
         <div className="absolute top-[30px] right-[270px] bg-white w-[180px] h-[150px] p-4 rounded flex flex-col justify-center items-center shadow-md">
           <HiPhoto className="text-slate-300 h-10 w-10 mb-2" />
           <p className="text-center text-gray-600 text-sm mb-2">
@@ -234,8 +233,8 @@ const EditItem = () => {
           />
         </div>
 
-        {/* Buttons */}
-        <div className="flex justify-start gap-4 p-3 shadow-inner rounded">
+        
+        <div className="flex justify-start gap-4 p-3 mt-8 shadow-inner rounded">
           <button
             type="submit"
             className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"

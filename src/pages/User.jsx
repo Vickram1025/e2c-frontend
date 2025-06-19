@@ -1,65 +1,124 @@
-import React, { useState } from 'react';
-import { HiPhoto } from "react-icons/hi2";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { HiPhoto } from 'react-icons/hi2';
 
 const User = () => {
+  const [userDatas, setUserDatas] = useState([]);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     userName: '',
     password: '',
     email: '',
-    file: null,
+    image: null,
   });
+  const [editId, setEditId] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ to prevent double submit
 
-  const [users, setUsers] = useState([]);
-  const [editIndex, setEditIndex] = useState(null);
+  const fetchData = () => {
+    axios
+      .get('http://localhost:8000/registration/allUserData')
+      .then((res) => setUserDatas(res.data))
+      .catch((err) => console.error('Fetch error:', err));
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleChange = (e) => {
-    const { name, value, type, files } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "file" ? files[0] : value,
-    }));
+    const { name, value, files } = e.target;
+    if (files) {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0],
+      }));
+      setPreviewImage(URL.createObjectURL(files[0]));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editIndex !== null) {
-      const updatedUsers = [...users];
-      updatedUsers[editIndex] = formData;
-      setUsers(updatedUsers);
-      setEditIndex(null);
-    } else {
-      setUsers((prev) => [...prev, formData]);
+    setIsSubmitting(true); // ✅ disable submit while sending
+
+    const form = new FormData();
+    form.append('firstName', formData.firstName);
+    form.append('lastName', formData.lastName);
+    form.append('userName', formData.userName);
+    form.append('email', formData.email);
+    form.append('password', formData.password); // ✅ always send password
+
+    if (formData.image) {
+      form.append('image', formData.image);
     }
 
-    setFormData({
-      firstName: '',
-      lastName: '',
-      userName: '',
-      password: '',
-      email: '',
-      file: null,
-    });
+    try {
+      const url = editId
+        ? `http://localhost:8000/registration/edit/${editId}`
+        : `http://localhost:8000/registration/createuser`;
+
+      const method = editId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        body: form,
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        alert(editId ? 'User updated successfully!' : 'User registered successfully!');
+        setEditId(null);
+        setPreviewImage(null);
+        setFormData({
+          firstName: '',
+          lastName: '',
+          userName: '',
+          password: '',
+          email: '',
+          image: null,
+        });
+        fetchData();
+      } else {
+        alert(result.message || 'Operation failed.');
+      }
+    } catch (error) {
+      console.error('Submit error:', error);
+      alert('Server error');
+    } finally {
+      setIsSubmitting(false); // ✅ enable button again
+    }
   };
 
-  const handleEdit = (index) => {
-    setFormData(users[index]);
-    setEditIndex(index);
+  const handleEdit = (user) => {
+    setFormData({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      userName: user.userName,
+      password: user.password || '', // ✅ pre-fill or allow manual input
+      email: user.email,
+      image: null,
+    });
+    setEditId(user._id);
+    setPreviewImage(`http://localhost:8000/uploads/${user.image}`);
   };
 
-  const handleDelete = (index) => {
-    const updated = users.filter((_, i) => i !== index);
-    setUsers(updated);
-    setEditIndex(null);
-    setFormData({
-      firstName: '',
-      lastName: '',
-      userName: '',
-      password: '',
-      email: '',
-      file: null,
-    });
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        await axios.delete(`http://localhost:8000/registration/delete/${id}`);
+        alert('User deleted successfully!');
+        fetchData();
+      } catch (error) {
+        console.error('Delete error:', error);
+        alert('Error deleting user.');
+      }
+    }
   };
 
   return (
@@ -67,74 +126,28 @@ const User = () => {
       <form
         onSubmit={handleSubmit}
         className="bg-slate-100 p-6 rounded shadow-md w-full max-w-xl mb-8"
+        encType="multipart/form-data"
       >
-        <h2 className="text-2xl font-semibold mb-6 text-center">User Registration</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-center">
+          {editId ? 'Edit User' : 'User Registration'}
+        </h2>
 
         <div className="space-y-4">
-          {/* First Name */}
-          <div className="flex items-center">
-            <label className="w-1/3 text-left pr-4 font-medium">First Name:</label>
-            <input
-              type="text"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              className="p-2 rounded w-2/3 bg-white"
-              required
-            />
-          </div>
-
-          {/* Last Name */}
-          <div className="flex items-center">
-            <label className="w-1/3 text-left pr-4 font-medium">Last Name:</label>
-            <input
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              className="p-2 rounded w-2/3 bg-white"
-              required
-            />
-          </div>
-
-          {/* User Name */}
-          <div className="flex items-center">
-            <label className="w-1/3 text-left pr-4 font-medium">User Name:</label>
-            <input
-              type="text"
-              name="userName"
-              value={formData.userName}
-              onChange={handleChange}
-              className="p-2 rounded w-2/3 bg-white"
-              required
-            />
-          </div>
-
-          {/* Password */}
-          <div className="flex items-center">
-            <label className="w-1/3 text-left pr-4 font-medium">Password:</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="p-2 rounded w-2/3 bg-white"
-              required
-            />
-          </div>
-
-          {/* Email */}
-          <div className="flex items-center">
-            <label className="w-1/3 text-left pr-4 font-medium">Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="p-2 rounded w-2/3 bg-white"
-              required
-            />
-          </div>
+          {['firstName', 'lastName', 'userName', 'password', 'email'].map((field, idx) => (
+            <div className="flex items-center" key={idx}>
+              <label className="w-1/3 text-left pr-4 font-medium capitalize">
+                {field.replace(/([A-Z])/g, ' $1')}:
+              </label>
+              <input
+                type={field === 'password' ? 'password' : field === 'email' ? 'email' : 'text'}
+                name={field}
+                value={formData[field]}
+                onChange={handleChange}
+                className="p-2 rounded w-2/3 bg-white"
+                required
+              />
+            </div>
+          ))}
 
           {/* Upload Image */}
           <div className="flex items-center">
@@ -142,16 +155,23 @@ const User = () => {
             <div className="relative w-2/3 rounded p-4 flex flex-col items-center justify-center bg-white">
               <HiPhoto className="text-slate-400 h-10 w-10 mb-2" />
               <p className="text-sm text-gray-600 text-center">
-                Drag image here or <span className="text-blue-600 font-medium cursor-pointer">browse</span>
+                Drag image here or{' '}
+                <span className="text-blue-600 font-medium cursor-pointer">browse</span>
               </p>
-              {formData.file && (
+              {formData.image ? (
                 <p className="mt-2 text-sm text-green-700 font-medium text-center">
-                  {formData.file.name}
+                  {formData.image.name}
                 </p>
-              )}
+              ) : previewImage ? (
+                <img
+                  src={previewImage}
+                  alt="Preview"
+                  className="mt-2 h-16 w-16 object-cover rounded border"
+                />
+              ) : null}
               <input
                 type="file"
-                name="file"
+                name="image"
                 onChange={handleChange}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
@@ -159,16 +179,42 @@ const User = () => {
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="mt-6 py-2 px-4 bg-green-500 text-white rounded hover:bg-green-600 transition"
-        >
-          {editIndex !== null ? 'Update' : 'Submit'}
-        </button>
+        <div className="flex gap-4 mt-6">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`py-2 px-4 text-white rounded transition ${
+              isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'
+            }`}
+          >
+            {isSubmitting ? 'Processing...' : editId ? 'Update' : 'Submit'}
+          </button>
+
+          {editId && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditId(null);
+                setPreviewImage(null);
+                setFormData({
+                  firstName: '',
+                  lastName: '',
+                  userName: '',
+                  password: '',
+                  email: '',
+                  image: null,
+                });
+              }}
+              className="py-2 px-4 bg-gray-400 text-white rounded hover:bg-gray-500 transition"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
-      {/* Users Table */}
-      {users.length > 0 && (
+      {/* Table */}
+      {userDatas.length > 0 && (
         <div className="w-full max-w-6xl overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
@@ -183,18 +229,18 @@ const User = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user, index) => (
-                <tr key={index} className="text-center">
+              {userDatas.map((user, index) => (
+                <tr key={user._id || index} className="text-center">
                   <td className="py-2 px-4 border">{index + 1}</td>
                   <td className="py-2 px-4 border">{user.firstName}</td>
                   <td className="py-2 px-4 border">{user.lastName}</td>
                   <td className="py-2 px-4 border">{user.userName}</td>
                   <td className="py-2 px-4 border">{user.email}</td>
                   <td className="py-2 px-4 border">
-                    {user.file ? (
+                    {user.image ? (
                       <img
-                        src={URL.createObjectURL(user.file)}
-                        alt="Uploaded"
+                        src={`http://localhost:8000/uploads/${user.image}`}
+                        alt="User"
                         className="h-10 w-10 object-cover mx-auto rounded"
                       />
                     ) : (
@@ -203,14 +249,14 @@ const User = () => {
                   </td>
                   <td className="py-2 px-4 border space-x-2">
                     <button
-                      onClick={() => handleEdit(index)}
-                      className="bg-yellow-400 px-3 py-1 rounded text-white hover:bg-yellow-500"
+                      onClick={() => handleEdit(user)}
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(index)}
-                      className="bg-red-500 px-3 py-1 rounded text-white hover:bg-red-600"
+                      onClick={() => handleDelete(user._id)}
+                      className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                     >
                       Delete
                     </button>
