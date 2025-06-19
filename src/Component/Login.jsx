@@ -51,7 +51,7 @@ const Login = () => {
       {/* Left Text Content */}
       <div className="max-w-md text-black drop-shadow-md absolute left-16 ">
         <p className="text-2xl font-medium mb-2">WE HELP YOU</p>
-        <h1 className="text-[80px] font-semibold text-orange-500 leading-snug">
+        <h1 className="text-[80px] font-semibold text-orange-500 ">
           TO CHOOSE <br />
           EVERYTHING <br />
           YOU NEED
