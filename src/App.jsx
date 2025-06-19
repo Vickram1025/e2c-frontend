@@ -11,10 +11,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Login Route - default entry */}
+        
         <Route path="/" element={<Login />} />
 
-        {/* Protected Layout */}
+       
         <Route
           path="/home"
           element={

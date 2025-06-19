@@ -14,7 +14,7 @@ const User = () => {
   });
   const [editId, setEditId] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // ✅ to prevent double submit
+  const [isSubmitting, setIsSubmitting] = useState(false); 
 
   const fetchData = () => {
     axios
@@ -45,14 +45,14 @@ const User = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true); // ✅ disable submit while sending
+    setIsSubmitting(true); 
 
     const form = new FormData();
     form.append('firstName', formData.firstName);
     form.append('lastName', formData.lastName);
     form.append('userName', formData.userName);
     form.append('email', formData.email);
-    form.append('password', formData.password); // ✅ always send password
+    form.append('password', formData.password); 
 
     if (formData.image) {
       form.append('image', formData.image);
@@ -91,7 +91,7 @@ const User = () => {
       console.error('Submit error:', error);
       alert('Server error');
     } finally {
-      setIsSubmitting(false); // ✅ enable button again
+      setIsSubmitting(false);
     }
   };
 
@@ -100,7 +100,7 @@ const User = () => {
       firstName: user.firstName,
       lastName: user.lastName,
       userName: user.userName,
-      password: user.password || '', // ✅ pre-fill or allow manual input
+      password: user.password || '', 
       email: user.email,
       image: null,
     });
@@ -149,7 +149,7 @@ const User = () => {
             </div>
           ))}
 
-          {/* Upload Image */}
+         
           <div className="flex items-center">
             <label className="w-1/3 text-left pr-4 font-medium">Upload Image:</label>
             <div className="relative w-2/3 rounded p-4 flex flex-col items-center justify-center bg-white">
@@ -174,6 +174,7 @@ const User = () => {
                 name="image"
                 onChange={handleChange}
                 className="absolute inset-0 opacity-0 cursor-pointer"
+                required
               />
             </div>
           </div>
@@ -213,7 +214,7 @@ const User = () => {
         </div>
       </form>
 
-      {/* Table */}
+     
       {userDatas.length > 0 && (
         <div className="w-full max-w-6xl overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-300">

@@ -48,7 +48,7 @@ const Login = () => {
         backgroundSize: "cover",
       }}
     >
-      {/* Left Text Content */}
+     
       <div className="max-w-md text-black drop-shadow-md absolute left-16 ">
         <p className="text-2xl font-medium mb-2">WE HELP YOU</p>
         <h1 className="text-[80px] font-semibold text-orange-500 ">
@@ -59,14 +59,14 @@ const Login = () => {
         <p className="text-2xl font-medium mb-2">IN A EASY WAY</p>
       </div>
 
-      {/* Right Login Form */}
+     
       <div className="bg-[#C5C4C4] bg-opacity-30 p-6 rounded-3xl shadow-md w-[450px] absolute right-[170px]">
         <form onSubmit={handleLogin} className="">
           <h2 className="text-3xl font-bold mb-8 text-center text-[#565656]">
             LOG IN
           </h2>
 
-          {/* Email */}
+         
           <div className="flex items-center mb-6 relative">
             <label className="w-32 text-[#565656] text-base font-medium">E-mail:</label>
             <input
@@ -76,12 +76,12 @@ const Login = () => {
               onChange={(e) =>
                 setFormData({ ...formData, [e.target.name]: e.target.value })
               }
-              className=" w-[270px] flex-1 border-b-2 border-[#58585A] bg-transparent  pl-6 text-gray-900 text-sm focus:outline-none focus:border-orange-500 absolute bottom-2 left-24"
+              className=" w-[250px] flex-1 border-b-2 border-[#58585A] bg-transparent  pl-6 text-gray-900 text-sm focus:outline-none focus:border-orange-500 absolute bottom-2 left-24"
               required
             />
           </div>
 
-          {/* Password */}
+        
           <div className="flex items-center mb-8 relative">
             <label className="w-32 text-[#565656] text-base font-medium">Password:</label>
             <input
@@ -91,12 +91,12 @@ const Login = () => {
               onChange={(e) =>
                 setFormData({ ...formData, [e.target.name]: e.target.value })
               }
-              className=" w-[270px]  flex-1 border-b-2 border-[#58585A] bg-transparent  pl-6 text-gray-900 text-sm focus:outline-none focus:border-orange-500 absolute bottom-2 left-24"
+              className=" w-[250px]  flex-1 border-b-2 border-[#58585A] bg-transparent  pl-6 text-gray-900 text-sm focus:outline-none focus:border-orange-500 absolute bottom-2 left-24"
               required
             />
           </div>
 
-          {/* Button + Forget */}
+         
           <div className="flex items-center justify-evenly">
             <button
               type="submit"
