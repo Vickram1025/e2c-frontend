@@ -28,6 +28,7 @@ const Login = () => {
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("user", JSON.stringify(data.user));
         setFormData({ email: "", password: "" });
+        alert("successfully login ")
         navigate("/home");
       } else {
         alert(data.message || "Login failed");
@@ -104,11 +105,12 @@ const Login = () => {
             >
               Sign in
             </button>
-
+             
             <button
               type="button"
               className="text-white text-base  hover:text-[#F5821F] tracking-widest"
-              onClick={() => alert("Forgot Password")}
+              onClick={() =>navigate("/forgot-password")}
+             
             >
               Forget
             </button>

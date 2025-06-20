@@ -3,18 +3,21 @@ import Sidebar from "./Component/Sidebar";
 import Home from "./pages/Home";
 import EditItem from "./pages/EditItem";
 import User from "./pages/User";
+import ForgotPassword from "./Component/ForgotPassword";
 
 import ProtectedRoute from "./ProtectedRoute";
-import Login from "./Component/Login"
+
+import ResetPassword from "./Component/ResetPassword";
+import Login from "./Component/Login";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        
         <Route path="/" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:id/:token" element={<ResetPassword />} />
 
-       
         <Route
           path="/home"
           element={

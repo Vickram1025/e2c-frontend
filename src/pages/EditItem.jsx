@@ -23,6 +23,8 @@ const EditItem = () => {
     image: null,
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
     setForm(prev => ({
@@ -39,6 +41,8 @@ const EditItem = () => {
       return;
     }
 
+    setIsSubmitting(true);
+
     const data = new FormData();
     data.append('name', form.name);
     data.append('sku', form.sku);
@@ -52,7 +56,6 @@ const EditItem = () => {
       await axios.post('http://localhost:8000/product/createproduct', data);
       alert("Product created successfully");
 
-
       setForm({
         name: '',
         sku: '',
@@ -65,6 +68,8 @@ const EditItem = () => {
     } catch (err) {
       console.error(err);
       alert("Failed to create product");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -82,7 +87,6 @@ const EditItem = () => {
 
   return (
     <div className="w-[80%] h-[560px] bg-white ml-[260px]">
-      
       <div className="h-[44px] w-full flex items-center justify-between px-4 bg-slate-100 text-gray-700 border-b">
         <div className="flex items-center gap-4">
           <LuTimer className="text-xl text-gray-500" />
@@ -107,7 +111,6 @@ const EditItem = () => {
         </div>
       </div>
 
-     
       <div className='flex justify-between items-center px-3'>
         <h2 className="text-2xl font-bold text-start p-2">Edit Item</h2>
         <img src={xlogo} alt="" className='h-5 w-5' />
@@ -116,7 +119,6 @@ const EditItem = () => {
       <form onSubmit={handleSubmit} className="w-full h-[360px] bg-slate-100 mb-4 flex flex-col relative">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-4">
           <div className="space-y-2">
-            
             <div>
               <label className='flex gap-5'>
                 Name
@@ -130,7 +132,6 @@ const EditItem = () => {
               </label>
             </div>
 
-           
             <div>
               <label className='flex gap-5'>
                 SKU
@@ -144,7 +145,6 @@ const EditItem = () => {
               </label>
             </div>
 
-            
             <div>
               <label className='flex gap-5'>
                 Unit
@@ -163,7 +163,6 @@ const EditItem = () => {
               </label>
             </div>
 
-           
             <div>
               <label className="flex gap-5 relative">
                 HSN Code
@@ -178,7 +177,6 @@ const EditItem = () => {
               </label>
             </div>
 
-           
             <div>
               <label className="flex gap-5">
                 Tax Preference
@@ -198,7 +196,6 @@ const EditItem = () => {
               </label>
             </div>
 
-           
             <div>
               <label className="flex flex-row gap-5">
                 Exemption Reason
@@ -216,12 +213,17 @@ const EditItem = () => {
           </div>
         </div>
 
-       
         <div className="absolute top-[30px] right-[270px] bg-white w-[180px] h-[150px] p-4 rounded flex flex-col justify-center items-center shadow-md">
           <HiPhoto className="text-slate-300 h-10 w-10 mb-2" />
           <p className="text-center text-gray-600 text-sm mb-2">
-            Drag image(s) here or <br />
-            <span className="text-blue-600 font-medium cursor-pointer">Browse images</span>
+            {form.image ? (
+              <span className="text-blue-600">{form.image.name}</span>
+            ) : (
+              <>
+                Drag image(s) here or <br />
+                <span className="text-blue-600 font-medium cursor-pointer">Browse images</span>
+              </>
+            )}
           </p>
           <input
             type="file"
@@ -233,13 +235,15 @@ const EditItem = () => {
           />
         </div>
 
-        
         <div className="flex justify-start gap-4 p-3 mt-8 shadow-inner rounded">
           <button
             type="submit"
-            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+            className={`text-white px-6 py-2 rounded-lg ${
+              isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+            }`}
+            disabled={isSubmitting}
           >
-            Save
+            {isSubmitting ? 'Processing...' : 'Save'}
           </button>
           <button
             type="button"
@@ -255,3 +259,16 @@ const EditItem = () => {
 };
 
 export default EditItem;
+
+
+
+
+
+
+
+
+
+
+
+
+
