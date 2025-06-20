@@ -54,25 +54,21 @@ const ResetPassword = () => {
         className="bg-[#C5C4C4] bg-opacity-60 p-6 rounded-3xl shadow-md w-full max-w-md"
       >
         <h2 className="text-3xl font-bold mb-8 text-center text-[#565656]">Reset Your Password</h2>
-        <label htmlFor="newPassword" className="block mb-2 text-gray-700 font-medium">
-          New Password
-        </label>
+       
         <input
           id="newPassword"
           type="password"
-          
+          placeholder=" New Password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           className="w-full border-b-2 border-[#58585A] bg-transparent pl-2 text-gray-900 text-sm focus:outline-none focus:border-orange-500 mb-4 pb-2"
           required
         />
-        <label htmlFor="confirmPassword" className="block mb-2 text-gray-700 font-medium">
-          Confirm Password
-        </label>
+        
         <input
           id="confirmPassword"
           type="password"
-          
+          placeholder="Confirm Password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           className="w-full border-b-2 border-[#58585A] bg-transparent pl-2 text-gray-900 text-sm focus:outline-none focus:border-orange-500 mb-6 pb-2"

@@ -10,7 +10,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import ResetPassword from "./Component/ResetPassword";
 import Login from "./Component/Login";
 
-function App() {
+function RouterComponent() {
   return (
     <BrowserRouter>
       <Routes>
@@ -64,4 +64,4 @@ function App() {
   );
 }
 
-export default App;
+export default RouterComponent;
