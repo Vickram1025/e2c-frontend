@@ -109,7 +109,7 @@ function Sidebar() {
 
             {openSale && (
               <ul className="pl-2 mt-1 space-y-1 text-gray-200">
-                {/* Add nested sales links here */}
+               
               </ul>
             )}
           </li>
@@ -142,7 +142,7 @@ function Sidebar() {
 
             {openTracking && (
               <ul className="pl-2 mt-1 space-y-1 text-gray-200">
-                {/* Add nested tracking links here */}
+             
               </ul>
             )}
           </li>
