@@ -1,30 +1,35 @@
 import React, { useState } from "react";
+import axios from "axios";
 import forgetimg from "../img/Forget.png";
+import { useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      const res = await fetch("http://localhost:8000/registration/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+      const res = await axios.post("http://localhost:8000/registration/forgot-password", {
+        email,
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("Reset link sent to your email.");
-        setEmail("");
+      if (res.data?.message) {
+        alert(res.data.message);
       } else {
-        alert(data.message || "Error sending reset link.");
+        alert("Reset link sent to your email.");
       }
+
+      setEmail("");
     } catch (error) {
-      console.error("Error:", error);
-      alert("Server error. Please try again later.");
+      alert(
+        error.response?.data?.message || "Server error. Please try again later."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -43,23 +48,43 @@ const ForgotPassword = () => {
         <h2 className="text-3xl font-bold mb-8 text-center text-[#565656]">
           Forgot Password
         </h2>
-        <label className="block mb-2 text-[#565656] font-medium">
-          Enter your registered email
-        </label>
+
+        
+
         <input
           type="email"
-          className="w-full border-b-2 border-[#58585A] bg-transparent pl-2 text-gray-900 text-sm focus:outline-none focus:border-orange-500 mb-4" 
+          placeholder="Enter your email"
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-orange-500 dark:focus:border-orange-500"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          
           required
         />
-        <button
-          type="submit"
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold p-2 rounded transition duration-200"
-        >
-          Send Reset Link
-        </button>
+
+        <div className="flex justify-between items-center mt-6">
+
+            <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="font-semibold px-5 py-2 rounded text-white bg-orange-500 hover:bg-orange-600"
+          >
+            Back to Login
+          </button>
+
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`font-semibold px-5 py-2 rounded text-white ${
+              isSubmitting
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-orange-500 hover:bg-orange-600"
+            }`}
+          >
+            {isSubmitting ? "Sending..." : "Send Reset Link"}
+          </button>
+
+        
+        </div>
       </form>
     </div>
   );

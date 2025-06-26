@@ -23,14 +23,18 @@ const EditItem = () => {
     image: null,
   });
 
+  const [previewImage, setPreviewImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
-    setForm(prev => ({
-      ...prev,
-      [name]: type === 'file' ? files[0] : value,
-    }));
+    if (type === 'file') {
+      const file = files[0];
+      setForm(prev => ({ ...prev, image: file }));
+      setPreviewImage(URL.createObjectURL(file));
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -44,13 +48,9 @@ const EditItem = () => {
     setIsSubmitting(true);
 
     const data = new FormData();
-    data.append('name', form.name);
-    data.append('sku', form.sku);
-    data.append('unit', form.unit);
-    data.append('hsnCode', form.hsnCode);
-    data.append('taxPreference', form.taxPreference);
-    data.append('exemptionReason', form.exemptionReason);
-    data.append('image', form.image);
+    Object.entries(form).forEach(([key, value]) => {
+      data.append(key, value);
+    });
 
     try {
       await axios.post('http://localhost:8000/product/createproduct', data);
@@ -65,6 +65,7 @@ const EditItem = () => {
         exemptionReason: 'None',
         image: null,
       });
+      setPreviewImage(null);
     } catch (err) {
       console.error(err);
       alert("Failed to create product");
@@ -83,10 +84,12 @@ const EditItem = () => {
       exemptionReason: 'None',
       image: null,
     });
+    setPreviewImage(null);
   };
 
   return (
-    <div className="w-[80%] h-[560px] bg-white ml-[260px]">
+    <div className="w-[80%] h-[560px] bg-white ml-[260px] ">
+     
       <div className="h-[44px] w-full flex items-center justify-between px-4 bg-slate-100 text-gray-700 border-b">
         <div className="flex items-center gap-4">
           <LuTimer className="text-xl text-gray-500" />
@@ -111,12 +114,14 @@ const EditItem = () => {
         </div>
       </div>
 
+   
       <div className='flex justify-between items-center px-3'>
         <h2 className="text-2xl font-bold text-start p-2">Edit Item</h2>
         <img src={xlogo} alt="" className='h-5 w-5' />
       </div>
 
-      <form onSubmit={handleSubmit} className="w-full h-[360px] bg-slate-100 mb-4 flex flex-col relative">
+    
+      <form onSubmit={handleSubmit} className="w-full bg-slate-100 mb-4 flex flex-col">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-4">
           <div className="space-y-2">
             <div>
@@ -211,31 +216,39 @@ const EditItem = () => {
               </label>
             </div>
           </div>
+
+        
+          <div className="flex items-center mb-4 relative">
+           
+            <div className=" absolute top-7 right-48 w-[200px] h-[130px] rounded p-4 flex flex-col items-center justify-center bg-white">
+              <HiPhoto className="text-slate-400 h-10 w-10 mb-2" />
+              <p className="text-sm text-gray-600 text-center">
+                Drag image here or{' '}
+                <span className="text-green-700 font-medium cursor-pointer">browse</span>
+              </p>
+              {form.image ? (
+                <p className="mt-2 text-sm text-green-700 font-medium text-center">
+                  {form.image.name}
+                </p>
+              ) : previewImage ? (
+                <img
+                  src={previewImage}
+                  alt="Preview"
+                  className="mt-2 h-16 w-16 object-cover rounded border"
+                />
+              ) : null}
+              <input
+                type="file"
+                name="image"
+                onChange={handleChange}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                required
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="absolute top-[30px] right-[270px] bg-white w-[180px] h-[150px] p-4 rounded flex flex-col justify-center items-center shadow-md">
-          <HiPhoto className="text-slate-300 h-10 w-10 mb-2" />
-          <p className="text-center text-gray-600 text-sm mb-2">
-            {form.image ? (
-              <span className="text-blue-600">{form.image.name}</span>
-            ) : (
-              <>
-                Drag image(s) here or <br />
-                <span className="text-blue-600 font-medium cursor-pointer">Browse images</span>
-              </>
-            )}
-          </p>
-          <input
-            type="file"
-            name="image"
-            onChange={handleChange}
-            className="opacity-0 absolute inset-0 cursor-pointer"
-            accept="image/*"
-            required
-          />
-        </div>
-
-        <div className="flex justify-start gap-4 p-3 mt-8 shadow-inner rounded">
+        <div className="flex justify-start gap-4 p-3 mt-4 shadow-inner rounded">
           <button
             type="submit"
             className={`text-white px-6 py-2 rounded-lg ${
@@ -259,16 +272,3 @@ const EditItem = () => {
 };
 
 export default EditItem;
-
-
-
-
-
-
-
-
-
-
-
-
-
