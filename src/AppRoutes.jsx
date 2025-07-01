@@ -8,6 +8,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import ResetPassword from "./Component/ResetPassword";
 import Login from "./Component/Login";
 import Banking from "./pages/Banking";
+import UserData from "./pages/UserData";
 
 // Reusable layout for protected routes
 const Layout = ({ children }) => (
@@ -63,6 +64,16 @@ function RouterComponent() {
             <ProtectedRoute>
               <Layout>
                 <Banking />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+          <Route
+          path="/UserData"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <UserData />
               </Layout>
             </ProtectedRoute>
           }

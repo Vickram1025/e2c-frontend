@@ -3,6 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import resetpasswordimg from "../img/Reset.png";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import e2clogo from '../img/e2clogo.png';
 
 const ResetPassword = () => {
   const { id, token } = useParams();
@@ -10,16 +13,9 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const [timeLeft, setTimeLeft] = useState(null);
   const [expired, setExpired] = useState(false);
   const navigate = useNavigate();
-
-
-
-
-
 
   useEffect(() => {
     try {
@@ -27,9 +23,6 @@ const ResetPassword = () => {
       const exp = decoded.exp * 1000;
       const now = Date.now();
       const timeRemaining = exp - now;
-
-     
-      
 
       if (timeRemaining <= 0) {
         setExpired(true);
@@ -61,14 +54,11 @@ const ResetPassword = () => {
     return `${min}:${sec}`;
   };
 
-  
-
   const handleReset = async (e) => {
     e.preventDefault();
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
-      setMessage("");
+      toast.error("Passwords do not match.");
       return;
     }
 
@@ -82,32 +72,34 @@ const ResetPassword = () => {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage(data.message);
-        setError("");
+        toast.success(data.message || "Password reset successful!");
         setTimeout(() => navigate("/"), 2000);
       } else {
-        setError(data.error || "Failed to reset password.");
-        setMessage("");
+        toast.error(data.error || "Failed to reset password.");
       }
     } catch (err) {
-      setError("Something went wrong. Please try again later.");
-      setMessage("");
+      toast.error("Something went wrong. Please try again later.");
     }
   };
 
   return (
     <div
-      className="flex items-center justify-start pl-32 min-h-screen bg-center bg-no-repeat"
+      className="flex items-center justify-center md:justify-start md:pl-32 min-h-screen bg-center bg-cover p-4"
       style={{
         backgroundImage: `url(${resetpasswordimg})`,
-        backgroundSize: "cover",
       }}
     >
       <form
         onSubmit={handleReset}
         className="bg-[#C5C4C4] bg-opacity-60 p-6 rounded-3xl shadow-md w-full max-w-md"
       >
-        <h2 className="text-3xl font-bold mb-4 text-center text-[#565656]">Reset Your Password</h2>
+        <div className="flex justify-center mb-5">
+          <img 
+            src={e2clogo} 
+            alt="E2C Logo" 
+            className="h-16 w-44 md:h-20 md:w-[220px]" 
+          />
+        </div>
 
         {expired ? (
           <p className="text-red-600 text-center font-semibold mb-4">
@@ -121,53 +113,48 @@ const ResetPassword = () => {
               </p>
             )}
 
-            {/* New Password */}
             <div className="relative mb-4">
               <input
                 type={showNewPassword ? "text" : "password"}
                 placeholder="New Password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-orange-500 dark:focus:border-orange-500"
+                className="bg-white rounded-md w-full p-3 md:p-2.5 text-black placeholder-gray-500 outline-none border border-orange-500"
                 required
               />
               <div
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-700"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-700"
                 onClick={() => setShowNewPassword((prev) => !prev)}
               >
-                {showNewPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                {showNewPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
               </div>
             </div>
 
-            {/* Confirm Password */}
             <div className="relative mb-6">
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-orange-500 dark:focus:border-orange-500"
+                className="bg-white rounded-md w-full p-3 md:p-2.5 text-black placeholder-gray-500 outline-none border border-orange-500"
                 required
               />
               <div
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-700"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-700"
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
               >
-                {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                {showConfirmPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold p-2 rounded transition duration-200"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded transition duration-200"
             >
               Update Password
             </button>
           </>
         )}
-
-        {message && <p className="text-green-600 mt-4 text-center text-sm">{message}</p>}
-        {error && <p className="text-red-600 mt-4 text-center text-sm">{error}</p>}
       </form>
     </div>
   );

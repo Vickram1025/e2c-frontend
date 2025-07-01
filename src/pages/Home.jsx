@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+
 const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      navigate('/', { replace: true }); // redirect if not logged in
+      navigate('/', { replace: true }); 
     }
 
-  
     const handleBack = () => {
       if (!localStorage.getItem('token')) {
         navigate('/', { replace: true });
@@ -23,8 +23,13 @@ const Home = () => {
   }, [navigate]);
 
   return (
-    <div className="bg-green-600 min-h-screen text-center flex justify-center items-center w-full md:ml-64 p-4">
-      <p className="text-white text-xl">Welcome to Home Page</p>
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center w-full px-4 sm:px-6 md:pl-64 md:pt-16">
+     
+      <div className="text-center">
+        <p className="text-gray-800 text-lg sm:text-xl md:text-2xl font-semibold">
+          Welcome to Home Page
+        </p>
+      </div>
     </div>
   );
 };
