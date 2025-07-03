@@ -7,20 +7,19 @@ const Header = () => {
 
   const loggedInUser = JSON.parse(localStorage.getItem("user"));
   const username = loggedInUser?.userName || "Guest";
-  const logo = loggedInUser?.image || " "; 
+  const logo = loggedInUser?.image || " ";
 
   const handleLogout = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("token"); 
-    
+    localStorage.removeItem("token");
     navigate("/", { replace: true });
-   
     window.location.reload();
   };
 
   return (
-    <header className="fixed top-0 left-[18%] w-[82%] h-[70px] bg-white shadow-md flex items-center justify-end pr-20 gap-7 z-40 sm:w-[82%]">
-      <div className="flex items-center gap-3 md:hidden sm:ml-4">
+    <header className="fixed top-0 left-[15%] w-[100%] md:left-[18%] md:w-[82%] h-[70px] bg-white shadow-md flex items-center justify-end gap-7 z-40 px-4">
+      {/* Mobile View */}
+      <div className="flex items-center gap-3 md:hidden ">
         <img
           src={
             logo.startsWith("http")
@@ -34,6 +33,8 @@ const Header = () => {
           {username}
         </span>
       </div>
+
+      {/* Desktop View */}
       <div className="flex items-center gap-3">
         <div className="hidden md:flex items-center gap-3">
           <img
@@ -51,14 +52,24 @@ const Header = () => {
         </div>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-1 text-red-400 hover:text-red-600 focus:text-red-600 text-sm sm:text-base transition-colors duration-200 pl-3"
+          className="flex items-center gap-1 text-red-400 hover:text-red-600 focus:text-red-600 text-sm sm:text-base transition-colors duration-200 pl-3 pr-5 sm:pr-32"
         >
           <FiLogOut size={16} />
           Logout
         </button>
       </div>
     </header>
+
+    
   );
 };
 
 export default Header;
+
+
+
+
+
+
+
+

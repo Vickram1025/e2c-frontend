@@ -84,7 +84,7 @@ const ResetPassword = () => {
 
   return (
     <div
-      className="flex items-center justify-center md:justify-start md:pl-32 min-h-screen bg-center bg-cover p-4"
+      className="flex items-center justify-center md:justify-start md:pl-32 min-h-screen bg-center bg-cover p-4 md:p-10"
       style={{
         backgroundImage: `url(${resetpasswordimg})`,
       }}

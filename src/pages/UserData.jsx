@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import { FiEdit, FiTrash2, FiFilter, FiChevronDown, FiChevronUp } from "react-icons/fi";
@@ -32,14 +30,19 @@ const UserData = () => {
   const [filterField, setFilterField] = useState("all");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [sortOrder, setSortOrder] = useState("desc");
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async () => {
+    setIsLoading(true);
     try {
       const res = await axios.get("http://localhost:8000/registration/allUserData");
-      setUserDatas(res.data);
+      setUserDatas(res.data || []);
     } catch (err) {
       console.error("Fetch error:", err);
       toast.error("Failed to fetch users");
+      setUserDatas([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -77,7 +80,6 @@ const UserData = () => {
     setIsSubmitting(true);
 
     const form = new FormData();
-
     Object.entries(formData).forEach(([key, value]) => {
       if (key !== "password" || !editId) {
         if (value) form.append(key, value);
@@ -118,7 +120,7 @@ const UserData = () => {
       password: "",
       image: null,
     });
-    setPreviewImage(`http://localhost:8000/uploads/${user.image}`);
+    setPreviewImage(user.image ? `http://localhost:8000/uploads/${user.image}` : null);
     setShowPassword(false);
     setShowForm(true);
   };
@@ -136,39 +138,63 @@ const UserData = () => {
     }
   };
 
+  const formatDisplayDate = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      return `${day}-${month}-${year} ${hours}:${minutes}`;
+    } catch (e) {
+      return "Invalid Date";
+    }
+  };
+
   const filteredUsers = useMemo(() => {
-    let result = [...userDatas];
+    if (!userDatas || userDatas.length === 0) return [];
     
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+    let result = [...userDatas];
+    const term = searchTerm.toLowerCase().trim();
+    
+    if (term) {
       result = result.filter((user) => {
-        if (filterField === "all") {
-          return (
-            user.email.toLowerCase().includes(term) ||
-            user.userName.toLowerCase().includes(term) ||
-            `${user.firstName} ${user.lastName}`.toLowerCase().includes(term)
-          );
-        } else if (filterField === "email") {
-          return user.email.toLowerCase().includes(term);
-        } else if (filterField === "username") {
-          return user.userName.toLowerCase().includes(term);
-        } else if (filterField === "name") {
-          return `${user.firstName} ${user.lastName}`.toLowerCase().includes(term);
+        const fullName = `${user.firstName || ''} ${user.lastName || ''}`.toLowerCase();
+        const formattedDate = formatDisplayDate(user.updatedAt).toLowerCase();
+        
+        switch (filterField) {
+          case "email":
+            return user.email?.toLowerCase().includes(term);
+          case "username":
+            return user.userName?.toLowerCase().includes(term);
+          case "name":
+            return fullName.includes(term);
+          case "date":
+            return formattedDate.includes(term);
+          default: // "all"
+            return (
+              user.email?.toLowerCase().includes(term) ||
+              user.userName?.toLowerCase().includes(term) ||
+              fullName.includes(term) ||
+              formattedDate.includes(term)
+            );
         }
-        return true;
       });
     }
     
+    // Sorting
     result.sort((a, b) => {
-      const dateA = new Date(a.createdAt || a.dateAdded || 0);
-      const dateB = new Date(b.createdAt || b.dateAdded || 0);
+      const dateA = new Date(a.updatedAt || a.createdAt || 0);
+      const dateB = new Date(b.updatedAt || b.createdAt || 0);
       return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
     });
     
     return result;
   }, [userDatas, searchTerm, filterField, sortOrder]);
 
-  const totalPages = Math.ceil(filteredUsers.length / USERS_PER_PAGE);
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / USERS_PER_PAGE));
   const paginatedUsers = filteredUsers.slice(
     (currentPage - 1) * USERS_PER_PAGE,
     currentPage * USERS_PER_PAGE
@@ -186,11 +212,18 @@ const UserData = () => {
     setSortOrder(sortOrder === "desc" ? "asc" : "desc");
   };
 
+  if (isLoading) {
+    return (
+      <div className="w-full lg:w-[82%] ml-[18%] flex items-center justify-center min-h-screen bg-white pt-20">
+        <div className="text-xl">Loading users...</div>
+      </div>
+    );
+  }
+
   return (
     <>
       <Header />
       <div className="w-full lg:w-[82%] ml-[18%] flex flex-col items-center min-h-screen bg-white pt-20 px-2 sm:px-4">
-       
         <div className="flex flex-col md:flex-row justify-between items-center gap-2 sm:gap-4 w-full px-2 sm:px-0">
           <div className="w-full md:w-auto mb-2 md:mb-0">
             <h1 className="text-xl sm:text-2xl font-semibold">Users Data</h1>
@@ -210,7 +243,7 @@ const UserData = () => {
                 className="flex items-center gap-1 border border-orange-300 rounded-md px-2 sm:px-3 py-2 hover:bg-orange-50 text-sm sm:text-base"
               >
                 <FiFilter size={16} />
-                <span className=" sm:inline">Filter</span>
+                <span className="sm:inline">Filter</span>
                 <FiChevronDown size={16} />
               </button>
               {showFilterDropdown && (
@@ -252,22 +285,29 @@ const UserData = () => {
                     >
                       Name
                     </button>
+                    <button
+                      onClick={() => {
+                        setFilterField("date");
+                        setShowFilterDropdown(false);
+                      }}
+                      className={`block w-full text-left px-4 py-2 text-sm ${filterField === "date" ? "bg-orange-100 text-orange-700" : "text-gray-700 hover:bg-gray-100"}`}
+                    >
+                      Date
+                    </button>
                   </div>
                 </div>
               )}
             </div>
             
-            {/* Sort Button */}
             <button
               onClick={toggleSortOrder}
               className="flex items-center gap-1 border border-orange-300 rounded-md px-2 sm:px-3 py-2 hover:bg-orange-50 text-sm sm:text-base"
               title={sortOrder === "desc" ? "Newest first" : "Oldest first"}
             >
               {sortOrder === "desc" ? <FiChevronDown size={16} /> : <FiChevronUp size={16} />}
-              <span className=" sm:inline">Sort</span>
+              <span className="sm:inline">Sort</span>
             </button>
             
-            {/* Search Input */}
             <input
               type="text"
               placeholder="Search..."
@@ -278,7 +318,6 @@ const UserData = () => {
           </div>
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto w-full mt-4 px-2 sm:px-0">
           <table className="min-w-full text-left text-sm sm:text-base">
             <thead>
@@ -288,84 +327,95 @@ const UserData = () => {
                 <th className="py-3 px-2 sm:px-4 font-medium hidden sm:table-cell">Mail</th>
                 <th className="py-3 px-2 sm:px-4 font-medium hidden md:table-cell">Name</th>
                 <th className="py-3 px-2 sm:px-4 font-medium text-center">Actions</th>
+                <th className="py-3 px-2 sm:px-4 font-medium text-center">Date and Time</th>
               </tr>
             </thead>
             <tbody>
-              {paginatedUsers.map((user) => (
-                <tr key={user._id} className="border-b hover:bg-gray-50">
-                  <td className="py-3 px-2 sm:px-4">
-                    {user.image ? (
-                      <img
-                        src={`http://localhost:8000/uploads/${user.image}`}
-                        alt="profile"
-                        className="h-8 sm:h-10 w-8 sm:w-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="h-8 sm:h-10 w-8 sm:w-10 rounded-full bg-yellow-400 text-white flex items-center justify-center font-bold text-sm sm:text-lg">
-                        {user.firstName?.[0]?.toUpperCase() || "U"}
+              {paginatedUsers.length > 0 ? (
+                paginatedUsers.map((user) => (
+                  <tr key={user._id} className="border-b hover:bg-gray-50">
+                    <td className="py-3 px-2 sm:px-4">
+                      {user.image ? (
+                        <img
+                          src={`http://localhost:8000/uploads/${user.image}`}
+                          alt="profile"
+                          className="h-8 sm:h-10 w-8 sm:w-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-8 sm:h-10 w-8 sm:w-10 rounded-full bg-yellow-400 text-white flex items-center justify-center font-bold text-sm sm:text-lg">
+                          {user.firstName?.[0]?.toUpperCase() || "U"}
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-3 px-2 sm:px-4">{user.userName || "N/A"}</td>
+                    <td className="py-3 px-2 sm:px-4 hidden sm:table-cell">{user.email || "N/A"}</td>
+                    <td className="py-3 px-2 sm:px-4 hidden md:table-cell">
+                      {user.firstName || ""} {user.lastName || ""}
+                    </td>
+                    <td className="py-3 px-2 sm:px-4 text-center">
+                      <div className="flex justify-center gap-2 sm:gap-4">
+                        <button
+                          onClick={() => handleEdit(user)}
+                          className="text-blue-600 hover:text-blue-800"
+                          title="Edit"
+                        >
+                          <FiEdit size={16} className="sm:w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(user._id)}
+                          className="text-red-500 hover:text-red-700"
+                          title="Delete"
+                        >
+                          <FiTrash2 size={16} className="sm:w-5" />
+                        </button>
                       </div>
-                    )}
-                  </td>
-                  <td className="py-3 px-2 sm:px-4">{user.userName}</td>
-                  <td className="py-3 px-2 sm:px-4 hidden sm:table-cell">{user.email}</td>
-                  <td className="py-3 px-2 sm:px-4 hidden md:table-cell">{user.firstName} {user.lastName}</td>
-                  <td className="py-3 px-2 sm:px-4 text-center">
-                    <div className="flex justify-center gap-2 sm:gap-4">
-                      <button
-                        onClick={() => handleEdit(user)}
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Edit"
-                      >
-                        <FiEdit size={16} className="sm:w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user._id)}
-                        className="text-red-500 hover:text-red-700"
-                        title="Delete"
-                      >
-                        <FiTrash2 size={16} className="sm:w-5" />
-                      </button>
-                    </div>
+                    </td>
+                    <td className="py-3 px-2 sm:px-4 text-center">
+                      {formatDisplayDate(user.updatedAt)}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="py-6 text-center text-gray-600">
+                    {userDatas.length === 0 ? "No users available" : "No matching users found"}
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
-          {paginatedUsers.length === 0 && (
-            <p className="text-center py-6 text-gray-600">No users found.</p>
-          )}
         </div>
 
-        {/* Pagination Controls */}
-        <div className="flex justify-center items-center gap-2 sm:gap-4 mt-4 sm:mt-6 mb-4">
-          <button
-            onClick={handlePrevPage}
-            disabled={currentPage === 1}
-            className={`px-2 sm:px-3 py-1 rounded border text-sm sm:text-base ${
-              currentPage === 1
-                ? "bg-gray-200 text-gray-500"
-                : "bg-white hover:bg-gray-100"
-            }`}
-          >
-            Previous
-          </button>
-          <span className="text-gray-600 font-medium text-sm sm:text-base">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-            className={`px-2 sm:px-3 py-1 rounded border text-sm sm:text-base ${
-              currentPage === totalPages
-                ? "bg-gray-200 text-gray-500"
-                : "bg-white hover:bg-gray-100"
-            }`}
-          >
-            Next
-          </button>
-        </div>
+        {filteredUsers.length > 0 && (
+          <div className="flex justify-center items-center gap-2 sm:gap-4 mt-4 sm:mt-6 mb-4">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className={`px-2 sm:px-3 py-1 rounded border text-sm sm:text-base ${
+                currentPage === 1
+                  ? "bg-gray-200 text-gray-500"
+                  : "bg-white hover:bg-gray-100"
+              }`}
+            >
+              Previous
+            </button>
+            <span className="text-gray-600 font-medium text-sm sm:text-base">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className={`px-2 sm:px-3 py-1 rounded border text-sm sm:text-base ${
+                currentPage === totalPages
+                  ? "bg-gray-200 text-gray-500"
+                  : "bg-white hover:bg-gray-100"
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        )}
 
-        {/* Modal Form */}
         {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 overflow-y-auto p-2 sm:p-4">
             <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md relative mx-2">
@@ -404,7 +454,6 @@ const UserData = () => {
                     placeholder="Last name"
                     value={formData.lastName}
                     onChange={handleChange}
-                    maxLength={2}
                     className="w-full sm:w-2/3 border border-orange-300 rounded-lg px-3 sm:px-4 py-1 sm:py-2 text-sm sm:text-base"
                     required
                   />

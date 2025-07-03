@@ -42,14 +42,14 @@ function Sidebar() {
 
       <div
         className={`fixed top-0 z-30 flex flex-col h-screen bg-gray-800 shadow-md transition-all duration-300 ease-in-out 
-          ${mobileMenuOpen ? "w-[40%] left-0" : "w-[40%] -left-full"} 
+          ${mobileMenuOpen ? "w-[40%] left-0 top-[4.8%]" : "w-[40%] -left-full"} 
           md:w-[18%] md:left-0`}
       >
         <div className="p-4 flex items-center justify-center border-b border-gray-700">
           <img src={e2clogo} alt="E2C Logo" className="h-[40px] w-[110px]" />
         </div>
 
-        {/* <nav className="p-2 text-white bg-gray-700 flex-1 "> */} <nav className="p-2 text-white bg-gray-700 flex-1 pt-[10vh] md:pt-0">
+         <nav className="p-2 text-white bg-gray-700 flex-1 pt-[10vh] md:pt-2">
           <ul className="space-y-3 text-sm">
             <li>
               <Link to="/home" className={sidebarLinkClass} onClick={closeMobileMenu}>
